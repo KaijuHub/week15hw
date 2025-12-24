@@ -1,0 +1,64 @@
+what is https?
+- its a secure way to send data between a web server and a web browser
+- secure version of http
+- stands for hypertext transfer protocol secure (HTTPS)
+- uses PORT 443, different from HTTP which uses PORT 80
+
+how does http work?
+- read it from link above.
+- this can get you paid big shmonies
+
+asymmetric key encryption == LeBron having a dif. handshake w/ each player
+
+SSL/TLS Certificates - Digital certificates that authenticate the identity of a website and enable an encrypted connection.
+
+Must use AWS certificate manager bc it can handle the complexity of creating, storing, & renewing public and private SSL/TLS 
+
+what is a web domain
+- a human-friendly website address o the internet (.com)
+- acts as a shortcut to complex IP addresses or long string of names
+
+
+steps for route 53
+- make sure ASG is up and running
+- search for route 53 on AWS (region will be in "global") (AWS global thru us-east-1)
+- register domain
+	- type in domain and check (if it is available, register it)
+- create a hosted zone
+	- write domain name that you just bought
+	- type - public
+	- click create
+- search acm on AWS (region will be back to specified region that your code is built in) (must create a certificate in each region)
+	- request certificate
+	- type - public -> click next
+	- copy domain name into domain name area -> leave everything else default -> click request
+create a 2nd ASG web app on port 80
+- start w/ security groups
+	- create security group -> name it "name of vpc" -sg-443 -> add inbound rules (SSH, HTTPS,HTTP) -> click create
+	- edit load balancer security group -> add inbound rules (HTTPS) -> click save
+- create a new launch template
+- create target group
+	- name "..." -443 -> leave protocol @ HTTP -> select appropriate vpc -> click create
+	- dont need to register any targets
+- verify certificate is issued in desired region
+- edit load balancer
+	- add listener (edit) -> select target group just created (-443) -> select certificate from acm -> click add listener
+- create new ASG
+	- name + "-443" -> select desired vpc -> select all PRIVATE subnets -> attach to an exisiting load balancer -> target group -> "-443"
+	- desired cap. 6, min cap. 3, max cap. 9 -> choose a replacement behavior (for lab no policy, for job launch before terminating) -> review -> create
+- go to route 53 and create a record
+	- click create a record -> simple routing -> define a simple record -> leave record name alone -> ip address or another alue... -> type in IP address
+	- easier AWS, simple way - "A" record should be selected, endpoint to alias to application  and classic load balancer -> region = desired region -> click dualstack."vpc name"
+- verify if it works
+	- http:// dns name
+	- https:// dns name (connection wont be secure, but continue anyways)
+----
+
+main type of records to worry about
+- "A" record returns a 32-bit number used to map hostnames to an IP address of the host, but also used for storing subnets. converts IPv4 address to domain name
+- "CNAME" (Canonical name record) - alias of one name to another. the
+
+"A" record is for the host directly, "CNAME" allows you to create another name of your choosing.
+
+SG-LB must have port 80 and 443 this needs to be edited
+SG-443 must have prt 80 and 443 this needs to be created
